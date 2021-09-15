@@ -45,11 +45,10 @@ spec:
             httpGet:
               path: /
               port: http
+          {{ if gt (len .Values.env) 0 }}
           env:
-            {{- range $env := .Values.env }}
-            - name: {{ $env.name }}
-              value: {{ quote $env.value }}
-            {{- end }}
+            {{- toYaml .Values.env | nindent 12 }}
+          {{ end }}
           {{- if gt (len .Values.mappedSecrets) 0 }}
           {{- $fullName := include "simple-docker-app.fullname" . -}}
           envFrom:
@@ -57,7 +56,7 @@ spec:
             - secretRef:
                 name: {{ $fullName }}-{{ $k }}-external-secret
             {{- end -}}
-          {{- end -}}
+          {{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -78,6 +78,10 @@ tolerations: []
 
 affinity: {}
 
+env: []
+#  - name: ENV_NAME
+#    value: VALUE
+
 mappedSecrets: {}
 #  gcpExample:
 #    backendType: gcpSecretsManager
