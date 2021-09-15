@@ -26,7 +26,6 @@ jobs:
         with:
           release_branches: main,master
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
 
       - name: Write Semver
         run: |-
