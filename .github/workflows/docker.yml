@@ -114,18 +114,18 @@ jobs:
           python-version: 3.7
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.0.0
+        uses: helm/chart-testing-action@v2.1.0
 
-#      - name: Run chart-testing (list-changed)
-#        id: list-changed
-#        run: |
-#          changed=$(ct list-changed)
-#          if [[ -n "$changed" ]]; then
-#            echo "::set-output name=changed::true"
-#          fi
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_REF##*/})
+          if [[ -n "$changed" ]]; then
+            echo "::set-output name=changed::true"
+          fi
 
       - name: Run chart-testing (lint)
-        run: ct lint --print-config --config ct.yaml
+        run: ct lint --print-config --config ct.yaml --target-branch ${GITHUB_REF##*/}
 
       # commit the chart
       - name: Commit Helm Chart
