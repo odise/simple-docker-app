@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  simple-docker-app:
+  - apiVersion: v2
+    appVersion: v0.0.14
+    created: "2021-09-15T11:59:30.921388314Z"
+    description: A Helm chart for Kubernetes
+    digest: c28c47719f2a122358600dd543d95ee976a6bfa5ae8eddb30076286d0af9791d
+    name: simple-docker-app
+    type: application
+    urls:
+    - https://github.com/odise/simple-docker-app/releases/download/simple-docker-app-v0.0.14/simple-docker-app-v0.0.14.tgz
+    version: v0.0.14
+generated: "2021-09-15T11:59:30.768632338Z"
