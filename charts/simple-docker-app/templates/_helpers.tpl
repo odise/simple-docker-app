@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "docker-sample-app.name" -}}
+{{- define "simple-docker-app.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "docker-sample-app.fullname" -}}
+{{- define "simple-docker-app.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "docker-sample-app.chart" -}}
+{{- define "simple-docker-app.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "docker-sample-app.labels" -}}
-helm.sh/chart: {{ include "docker-sample-app.chart" . }}
-{{ include "docker-sample-app.selectorLabels" . }}
+{{- define "simple-docker-app.labels" -}}
+helm.sh/chart: {{ include "simple-docker-app.chart" . }}
+{{ include "simple-docker-app.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "docker-sample-app.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "docker-sample-app.name" . }}
+{{- define "simple-docker-app.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "simple-docker-app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "docker-sample-app.serviceAccountName" -}}
+{{- define "simple-docker-app.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "docker-sample-app.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "simple-docker-app.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

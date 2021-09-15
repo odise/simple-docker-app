@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
-  IMAGE: sample-docker-app
+  IMAGE: simple-docker-app
 
 jobs:
   update-version:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Bump Version & Push Tag
         id: semver
-        uses: mathieudutour/github-tag-action@v4.6
+        uses: mathieudutour/github-tag-action@v5.6
         with:
           release_branches: main,master
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -63,7 +63,7 @@ jobs:
         run: |-
           docker build \
             --tag "ghcr.io/odise/$IMAGE:$GITHUB_SHA" \
-            --tag "ghcr.io/odise/$IMAGE::$(cat semver.txt)" \
+            --tag "ghcr.io/odise/$IMAGE:$(cat semver.txt)" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -71,7 +71,7 @@ jobs:
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'ghcr.io/odise/$IMAGE:${{ github.sha }}'
+          image-ref: 'ghcr.io/odise/${{ env.IMAGE }}:${{ github.sha }}'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -84,11 +84,13 @@ jobs:
   build-and-publish-helm-chart:
     name: Build & Publish Helm Chart
     runs-on: ubuntu-latest
-    needs: update-version
+    needs: setup-build-publish-deploy
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
 
       - name: Download Semver Artifact
         uses: actions/download-artifact@v2
@@ -112,24 +114,31 @@ jobs:
           python-version: 3.7
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.0.0
+        uses: helm/chart-testing-action@v2.1.0
 
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed)
+          changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_REF##*/})
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
           fi
 
       - name: Run chart-testing (lint)
-        run: ct lint --print-config --config ct.yaml
+        run: ct lint --print-config --config ct.yaml --target-branch ${GITHUB_REF##*/}
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.2.0
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install)
+        run: ct install --config ct.yaml --target-branch ${GITHUB_REF##*/}
 
       # commit the chart
       - name: Commit Helm Chart
         uses: EndBug/add-and-commit@v5
         with:
-          add: charts/$IAMGE
+          add: charts/${{ env.IAMGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
