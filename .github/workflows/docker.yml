@@ -1,0 +1,144 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  IMAGE: sample-docker-app
+
+jobs:
+  update-version:
+    name: Update Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Bump Version & Push Tag
+        id: semver
+        uses: mathieudutour/github-tag-action@v4.6
+        with:
+          release_branches: main,master
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write Semver
+        run: |-
+          printf "%s" "${{ steps.semver.outputs.new_tag }}" > semver.txt
+
+      - name: Upload Semver Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: semver
+          path: semver.txt
+          retention-days: 5
+
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    needs: update-version
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Semver Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: semver
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |-
+          docker build \
+            --tag "ghcr.io/odise/$IMAGE:$GITHUB_SHA" \
+            --tag "ghcr.io/odise/$IMAGE::$(cat semver.txt)" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            .
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ghcr.io/odise/$IMAGE:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'MEDIUM,HIGH,CRITICAL'
+
+      - name: Publish Docker Image
+        run: |-
+          docker push "ghcr.io/odise/$IMAGE:$(cat semver.txt)"
+
+  build-and-publish-helm-chart:
+    name: Build & Publish Helm Chart
+    runs-on: ubuntu-latest
+    needs: update-version
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Semver Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: semver
+
+      - name: Update Helm Chart Version
+        run: |-
+          sed -i "s/version: .*/version: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
+          sed -i "s/appVersion: .*/appVersion: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
+          sed -i "s/tag: .*/tag: $(cat semver.txt)/gm" charts/$IMAGE/values.yaml
+
+      # lint the helm chart
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.0.0
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed)
+          if [[ -n "$changed" ]]; then
+            echo "::set-output name=changed::true"
+          fi
+
+      - name: Run chart-testing (lint)
+        run: ct lint --print-config --config ct.yaml
+
+      # commit the chart
+      - name: Commit Helm Chart
+        uses: EndBug/add-and-commit@v5
+        with:
+          add: charts/$IAMGE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Helm Chart Releaser
+        uses: helm/chart-releaser-action@v1.0.0
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
