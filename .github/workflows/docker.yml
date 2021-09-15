@@ -71,7 +71,7 @@ jobs:
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/odise/$IMAGE:${{ github.sha }}
+          image-ref: 'ghcr.io/odise/${{ env.IMAGE }}:${{ github.sha }}'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -129,7 +129,7 @@ jobs:
       - name: Commit Helm Chart
         uses: EndBug/add-and-commit@v5
         with:
-          add: charts/$IAMGE
+          add: charts/${{ env.IAMGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
