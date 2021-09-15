@@ -26,6 +26,7 @@ jobs:
         with:
           release_branches: main,master
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
 
       - name: Write Semver
         run: |-
@@ -127,12 +128,12 @@ jobs:
       - name: Run chart-testing (lint)
         run: ct lint --print-config --config ct.yaml --target-branch ${GITHUB_REF##*/}
 
-      - name: Create kind cluster
-        uses: helm/kind-action@v1.2.0
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install)
-        run: ct install --config ct.yaml --target-branch ${GITHUB_REF##*/}
+#      - name: Create kind cluster
+#        uses: helm/kind-action@v1.2.0
+#        if: steps.list-changed.outputs.changed == 'true'
+#
+#      - name: Run chart-testing (install)
+#        run: ct install --config ct.yaml --target-branch ${GITHUB_REF##*/}
 
       # commit the chart
       - name: Commit Helm Chart
