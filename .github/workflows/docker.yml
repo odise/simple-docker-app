@@ -63,7 +63,7 @@ jobs:
         run: |-
           docker build \
             --tag "ghcr.io/odise/$IMAGE:$GITHUB_SHA" \
-            --tag "ghcr.io/odise/$IMAGE::$(cat semver.txt)" \
+            --tag "ghcr.io/odise/$IMAGE:$(cat semver.txt)" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
