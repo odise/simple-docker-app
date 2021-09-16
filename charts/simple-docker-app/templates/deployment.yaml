@@ -59,6 +59,33 @@ spec:
           {{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          image: {{ toYaml .Values.metrics.image | nindent 12 }}
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy | quote }}
+          {{- if .Values.metrics.securityContext.enabled }}
+          securityContext: {{- omit .Values.metrics.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://127.0.0.1:81/status' ]
+          ports:
+            - name: metrics
+              containerPort: 9113
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          {{- if .Values.metrics.resources }}
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
