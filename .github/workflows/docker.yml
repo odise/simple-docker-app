@@ -98,13 +98,16 @@ jobs:
         with:
           name: semver
 
-      - uses: chrisdickinson/setup-yq@latest
+      - name: Update Helm Chart Version in values.yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval -i '.image.tag = "$(cat semver.txt)"' charts/$IMAGE/values.yaml
+
       - name: Update Helm Chart Version
         run: |-
           sed -i "s/version: .*/version: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
           sed -i "s/appVersion: .*/appVersion: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
           # sed -i "s/tag: .*/tag: $(cat semver.txt)/gm" charts/$IMAGE/values.yaml
-          yq e -i '.image.tag = "$(cat semver.txt)"' charts/$IMAGE/values.yaml
 
       # lint the helm chart
       - name: Set up Helm
