@@ -61,7 +61,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
-          image: {{ toYaml .Values.metrics.image | nindent 12 }}
+          image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy | quote }}
           {{- if .Values.metrics.securityContext.enabled }}
           securityContext: {{- omit .Values.metrics.securityContext "enabled" | toYaml | nindent 12 }}
