@@ -100,7 +100,7 @@ jobs:
 
       - name: Update Helm Chart Version
         run: |-
-          wget https://github.com/mikefarah/yq/releases/download/4.13.0/q_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+          wget https://github.com/mikefarah/yq/releases/download/4.13.0/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
           sed -i "s/version: .*/version: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
           sed -i "s/appVersion: .*/appVersion: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
           # sed -i "s/tag: .*/tag: $(cat semver.txt)/gm" charts/$IMAGE/values.yaml
