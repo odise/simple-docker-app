@@ -113,3 +113,34 @@ mappedSecrets: {}
 #      - path: /bar/
 #        # optional: choose whether to scrape all child paths or not. Default is false
 #        recursive: false
+
+
+## Prometheus Exporter / Metrics
+metrics:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/nginx-exporter
+    tag: 0.9.0-debian-10-r153
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+  podAnnotations: {}
+  securityContext:
+    enabled: false
+    runAsUser: 1001
+  service:
+    port: 9113
+#    annotations:
+#      prometheus.io/scrape: "true"
+#      prometheus.io/port: "{{ .Values.metrics.service.port }}"
+  resources:
+    ## Example:
+    ## limits:
+    ##    cpu: 100m
+    ##    memory: 128Mi
+    limits: {}
+    ## Examples:
+    ## requests:
+    ##    cpu: 100m
+    ##    memory: 128Mi
+    requests: {}
