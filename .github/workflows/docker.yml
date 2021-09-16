@@ -102,7 +102,7 @@ jobs:
         run: |-
           sed -i "s/version: .*/version: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
           sed -i "s/appVersion: .*/appVersion: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
-          sed -i "s/tag: .*/tag: $(cat semver.txt)/gm" charts/$IMAGE/values.yaml
+          sed -i "s/tag: .*/tag: $(cat semver.txt)/" charts/$IMAGE/values.yaml
 
       # lint the helm chart
       - name: Set up Helm

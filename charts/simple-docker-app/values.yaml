@@ -130,9 +130,9 @@ metrics:
     runAsUser: 1001
   service:
     port: 9113
-#    annotations:
-#      prometheus.io/scrape: "true"
-#      prometheus.io/port: "{{ .Values.metrics.service.port }}"
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9113"
   resources:
     ## Example:
     ## limits:
