@@ -99,6 +99,9 @@ jobs:
           name: semver
 
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: 4.13.0
+          
       - name: Update Helm Chart Version
         run: |-
           sed -i "s/version: .*/version: $(cat semver.txt)/gm" charts/$IMAGE/Chart.yaml
