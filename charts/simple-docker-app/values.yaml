@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/odise/simple-docker-app
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: v0.0.27
+  tag: v0.0.28
 
 imagePullSecrets: []
 nameOverride: ""
@@ -121,7 +121,7 @@ metrics:
   image:
     registry: docker.io
     repository: bitnami/nginx-exporter
-    tag: 0.9.0-debian-10-r153
+    tag: v0.0.28
     pullPolicy: IfNotPresent
     pullSecrets: []
   podAnnotations: {}
