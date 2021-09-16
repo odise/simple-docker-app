@@ -1,4 +1,4 @@
-FROM nginx:alpine
+FROM nginx:stable-alpine
 
 COPY etc/nginx/conf.d/ /etc/nginx/conf.d/
 WORKDIR /usr/share/nginx/html
