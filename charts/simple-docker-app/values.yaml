@@ -6,7 +6,7 @@ image:
   repository: ghcr.io/odise/simple-docker-app
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: $(cat semver.txt)
+  tag: v0.0.36
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
